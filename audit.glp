@@ -1,0 +1,61 @@
+sudo auditctl -l
+
+-w /etc/passwd -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /etc/sudoers -p wa -k privilege
+-w /etc/ssh/sshd_config -p wa -k ssh
+-w /var/log/wtmp -p wa -k logins
+-w /var/log/btmp -p wa -k logins
+-a always,exit -F arch=b64 -S execve -F euid=0 -F key=rootcmd
+-a always,exit -F arch=b64 -S open,creat,openat -F auid>=1000 -F key=file_access
+-a always,exit -F arch=b64 -S rename,unlink -F auid>=1000 -F key=file_delete
+-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat -F key=perm_mod
+
+#######################################################################
+
+sudo cat /etc/audit/rules.d/glp.rules            # /etc/audit/rules.d/
+
+glp_admin@glpWS:~$ sudo cat /etc/audit/rules.d/glp.rules
+-D
+-b 8192
+-f 2
+
+## IDENTITÀ
+-w /etc/passwd -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/group -p wa -k identity
+
+## PRIVILEGI
+-w /etc/sudoers -p wa -k privilege
+
+## SSH
+-w /etc/ssh/sshd_config -p wa -k ssh
+
+## LOGIN
+-w /var/log/wtmp -p wa -k logins
+-w /var/log/btmp -p wa -k logins
+
+## COMANDI ROOT
+-a always,exit -F arch=b64 -S execve -F euid=0 -k rootcmd
+
+## ACCESSO FILE UTENTE
+-a always,exit -F arch=b64 -S open,openat,creat -F auid>=1000 -k file_access
+
+## CANCELLAZIONE FILE
+-a always,exit -F arch=b64 -S unlink,rename -F auid>=1000 -k file_delete
+
+## CAMBIO PERMESSI
+-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat -k perm_mod
+
+## BLOCCO CONFIGURAZIONE (GLP)
+-e 2
+
+###################################################################
+
+sudo auditctl -l
+sudo cat /etc/audit/rules.d/glp.rules
+sudo cat /etc/audit/audit.rules
+sudo ls -l /etc/audit/rules.d/
+
+
